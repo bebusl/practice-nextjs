@@ -1,3 +1,53 @@
 # Next.js 15 실습
 
 - [대시보드앱](https://nextjs.org/learn/dashboard-app) 튜토리얼 따라하기
+
+## 예제 구조
+
+    - /app : 모든 routes, 컴포넌트들, logic이 다 여기에 있음.
+    - /app/lib : 유틸리티 함수랑 데이터 패칭함수같은 앱에서 범용적으로 사용하는 함수들이 여기에
+    - /app/ui : UI 컴포넌트들
+    - /public : 정적 에셋 포함
+    - Config files: 루트에 next.config.ts같은 거 있는데, 이거 그냥 설정파일들임. 설정파일들은 루트에 있으요
+
+## 스타일링
+
+    - tailwind-css 쓸 수 있고, 이게 지금 제일 대중적인듯?
+    - css modules : 이름에 해시값같은게 붙어서 클래스네임 충돌로 인한 스타일 오류 방지 가능.
+
+## 폰트 최적화
+
+    - 폰트는 웹사이트 디자인에 중요한 역할을 함. 그렇지만 페치하고 로드해야 하는 커스텀 폰트를 사용할 때 웹 페이지의 성능에 영향을 미칠 수 있음.
+    - CLS => 폰트가 로딩되지 않은 경우 폴백 폰트로 노출되다가, 로드 완료후 폰트가 바꿔치기 되는데 이때 re-layout이 발생함. -> 웹 성능에 영향을 줌
+    - Next.js는 next/font 모듈을 사용해서 폰트를 최적화할 수 있도록 했음. 폰트 파일을 빌드 타임에 다운로드 받고, 정적 에셋으로써 호스트함. 이 말인즉슨 유저가 너의 앱을 방문했을 때 폰트를 다운받기 위해 추가적인 네트워크 요청이 발생하지 않음을 의미함.
+
+## 이미지 최적화
+
+    - next.js에서 /public폴더 안에 넣으면 정적 에셋을 제공할 수 있음. 그러나 단순하게 이미지를 가져와서 사용하면 아래 작업은 매뉴얼하게 직접 해주어야 함.
+      - 이미지가 서로 다른 스크린 사이즈들에 반응형으로 대응되게 해야함.
+      - 다른 기기에 대응되는 이미지 사이즈들을 명시해야함
+      - 이미지 로드됨에 따라 레이아웃 쉬프트가 발생하지 않도록 예방해야 함
+      - 유저의 뷰포트 밖에 있는 이미지는 래이지 로드해야 함
+    - 이 작업을 대신해주는게 next/image의 <Image>컴포넌트. img태그의 확장버전이며 아래와 같은 작업을 대신 해줌.
+      - 이미지가 로딩 중에 레이아웃 쉬프트가 발생하지 않게 해줌
+      - 작업 뷰포트에서 큰 이미지를 들고오는 것을 방지하기 위해 resizing
+      - 이미지를 자동으로 레이지 로딩해줌
+      - WebP, AVIF같은 모던 포맷을 제공
+
+## 응집도 높일 수 있음
+
+- layout.ts, pages.ts등 예약어를 제외한 애들은 라우팅 되지 않으므로, 그 페이지에서 사용하는 컴포넌트라던지 유틸함수등 가까운곳에 응집도 높게 구성할 수 있다.(By having a special name for page files, Next.js allows you to colocate UI components, test files, and other related code with your routes. Only the content inside the page file will be publicly accessible. For example, the /ui and /lib folders are colocated inside the /app folder along with your routes.
+  )
+
+## 공통 layout.ts를 적용하면 좋은점
+
+- 상위 요소의 layout.ts를 하위 컴포넌트들도 layout.ts를 덮어씀. 다만 layout.ts는 페이지가 바뀔 때 리렌더링이 안되고, page부분만 리렌더링 됨.(레이아웃이 유지되는 동안에는, 레이아웃 내의 react state는 페이지가 바뀌어도 유지됨. - 이것과 달리 리렌더링 되는게 template.ts)
+
+## a태그 쓰지 말고 Link로 페이지 전체 리렌더링을 막으세요!
+
+- a태그 쓰면 페이지 전체가 리로딩되고, 리렌더링 됨. 비용이 많이 들죠? Link 컴포넌트를 이용해 client-side navigating이 되도록 해주셔요.
+
+## 자동 코드-스플리팅과 프리페칭을 제공합니다.
+
+- Next.js는 네비게이션 경험을 향상하기 위해 route segment를 기준으로 자동적으로 코드 스플릿을 함. -> 코드 스플릿이 된다 - 페이지별로 코드가 분리되고, 특정 페이지에서 에러가 발생하더라도 다른 부분은 여전히 정상 동작한다.
+- 그리고 Link컴포넌트가 브라우저의 뷰포트에 나타나면, Next.js는 Link로 이동한 페이지에 필요한 정보를 prefetch함. 링크 클릭시 해당 페이지에 필요한 코드들은 백그라운드에서 이미 로딩되어 있기 때문에, 즉시 페이지 변환이 일어나는 것처럼 보이게 함(속도 지연 줄임)
