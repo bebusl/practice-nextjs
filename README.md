@@ -69,3 +69,31 @@
     - 1. JS Promise를 제공함. 데이터 페칭을 위해 useEffect와 useState를 쓸 필요 없음
     - 2. 서버에서 실행되므로, 비싼 데이터 페치나 로직이 서버에서 돌아가게 할 수 있음. 결과만 클라이언트로 전송
     - 3. 서버 컴포넌트는 서버에서 실행되기 때문에, API 레이어 없이 DB에 바로 접근 가능. API 레이어를 별도로 만들기 위해 작성하는 코드량과 시간을 줄일 수 있음.
+
+## 데이터 페칭 워터폴로 인한 블로킹 해소
+
+```
+const revenue = await fetchRevenue();
+const latestInvoices = await fetchLatestInvoices(); // wait for fetchRevenue() to finish
+const {
+  numberOfInvoices,
+  numberOfCustomers,
+  totalPaidInvoices,
+  totalPendingInvoices,
+} = await fetchCardData(); // wait for fetchLatestInvoices() to finish
+```
+
+이렇게 하면 의도치 않게 워터폴이 발생함. revenue데이터 다 호출 된 뒤에, latestInvoices불러오고, 그 다음 fetchCardData를 하므로.
+-> 병렬적으로 들고오면 최적화가 되겠지 그래서
+`Promise.all()`또는 `Promise.allSettled()`를 써서 병렬처리를 합시다.
+
+```
+  const data = await Promise.all([
+      invoiceCountPromise,
+      customerCountPromise,
+      invoiceStatusPromise,
+    ]);
+```
+
+- 이렇게 하면 동시에 많은 데이터 페치를 할 수 있음. -> 각 요청 완료될때까지 기다리는 시간 줄어듦
+- 그러나 한 요청의 응답이 유난히 느리면 다른 애들도 다 걔를 기다려서 화면에 아무것도 안뜬다는 단점이 있음
