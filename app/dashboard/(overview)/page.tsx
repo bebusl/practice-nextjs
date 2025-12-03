@@ -1,12 +1,13 @@
-import { fetchCardData, fetchLatestInvoices, fetchRevenue } from "../lib/data";
-import { Card } from "../ui/dashboard/cards";
-import LatestInvoices from "../ui/dashboard/latest-invoices";
-import RevenueChart from "../ui/dashboard/revenue-chart";
-import { lusitana } from "../ui/fonts";
+import { Suspense } from "react";
+import { fetchCardData, fetchLatestInvoices } from "../../lib/data";
+import { Card } from "../../ui/dashboard/cards";
+import LatestInvoices from "../../ui/dashboard/latest-invoices";
+import RevenueChart from "../../ui/dashboard/revenue-chart";
+import { lusitana } from "../../ui/fonts";
+import { RevenueChartSkeleton } from "@/app/ui/skeletons";
 
 export default async function Page() {
   const [
-    revenue,
     latestInvoices,
     {
       numberOfCustomers,
@@ -14,11 +15,7 @@ export default async function Page() {
       totalPaidInvoices,
       totalPendingInvoices,
     },
-  ] = await Promise.all([
-    fetchRevenue(),
-    fetchLatestInvoices(),
-    fetchCardData(),
-  ]);
+  ] = await Promise.all([fetchLatestInvoices(), fetchCardData()]);
 
   return (
     <main>
@@ -36,7 +33,11 @@ export default async function Page() {
         />
       </div>
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-8">
-        <RevenueChart revenue={revenue} />
+        {/* Suspense를 이용한 일부 스트리밍  */}
+        <Suspense fallback={<RevenueChartSkeleton />}>
+          <RevenueChart />
+        </Suspense>
+
         <LatestInvoices latestInvoices={latestInvoices} />
       </div>
     </main>
