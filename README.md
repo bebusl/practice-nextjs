@@ -188,3 +188,24 @@ const {
    - **중요 정보부터 먼저 보여줘야 하는가?**
 
 이걸 조합하면 Suspense placement는 자연스럽게 결정됨
+
+## 검색과 페이지네이션 추가
+
+### Next.js API 사용법 : `useSearchParams`, `usePathname`, `useRouter`
+
+- URL search params를 검색 상태관리에 쓰는 이유
+
+  - 1. 북마크 생성 가능, 공유 가능
+  - 2. 서버사이드 렌더링 가능
+  - 3. 통계 및 추적 가능
+
+- Next.js API
+  - `useSearchParams` : 현재 URL의 파라미터에 접근가능.
+  - `usePathname` : 현재 URL의 pathname을 읽어줌
+  - `useRouter` : 클라이언트 컴포넌트 간 네비게이션 가능하게 함
+
+### URL search parameter를 이용한 검색과 페이지네이션
+
+- client component에서는 useSearchParams로 searchParam받아올 수 있음.
+- page component는 props에서 searchParams를 얻어볼 수 있음
+  - `const searchParams = await props.searchParams;`
