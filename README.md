@@ -209,3 +209,25 @@ const {
 - client component에서는 useSearchParams로 searchParam받아올 수 있음.
 - page component는 props에서 searchParams를 얻어볼 수 있음
   - `const searchParams = await props.searchParams;`
+
+## 데이터 변형(mutating)
+
+### React Server Action이란 무엇이고 data mutate시 사용하는 법
+
+- Server Action이란? : 서버에서 비동기적인 코드를 실행시킬 수 있게 해줌. -> DB 직접 접근, 데이터 소스 직접 접근이 가능하기에 API를 따로 만들 필요 없음
+- 보안이 웹 어플리케이션에선 가장 중요함. -> 서버액션은 서버에서 돌기 때문에 보안적으로 강함
+- Server Action : ts파일 제일 상단에 'use server'로 서버 함수임을 명시. 그럼 그 파일에서 export되는 모든 함수는 Server Action으로써 판단 됨.
+- Server Action은 'Client'컴포넌트에도, 'Server'컴포넌트에도 import해서 사용 가능
+- Server Action 파일에 작성된 함수 중 사용되지 않는 함수가 있다면 자동으로 번들에서 빠짐
+
+### 폼들과 React Server Component와 동작하는 법
+
+- React에선 `<form>`엘레멘트의 `action` 어트리뷰트를 서버 액션 실행시키는데 사용합니다.
+- action에 Server Action 함수를 등록합니다. -> Server Action 함수는 props로 native FormData를 받습니다.
+- **Server Action은 Next.js의 캐싱과도 깊게 연관되어 있습니다. 폼이 Server Action을 통해 제출되면, 데이터 변형하는데 액션을 쓸 수 있을 뿐만 아니라, `revalidatePath`나 `revalidateTag`같은 API를 이용해 연관된 캐시를 revalidate할 수 있습니다.**
+
+### Native `FormData`객체 사용하는 베스트 프랙티스(밸리데이션 포함)
+
+### `revalidatePath` API를 통해 클라이언트 캐시를 revalidate하는 법
+
+### 특정 ID와 함께 dynamic route segment 생성하는법
